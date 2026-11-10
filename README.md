@@ -6,6 +6,16 @@ The main idea is simple: upload experiment data, compare a control group and a t
 
 I wanted this project to be more than just a notebook, so I built it as a complete application with a backend API, database support, a web interface, automated tests, and an AI-assisted explanation layer.
 
+## Screenshots
+
+### Experiment Dashboard
+
+![ExperimentForge Dashboard](screenshots/dashboard.png)
+
+### AI Copilot
+
+![ExperimentForge AI Copilot](screenshots/copilot.png)
+
 ## What the project does
 
 ExperimentForge can:
