@@ -1,152 +1,215 @@
-# ExperimentForge — AI Experimentation & Decision Intelligence
+# ExperimentForge
 
-**Release:** 1.1.0 — final audited portfolio build
+ExperimentForge is a full-stack A/B testing and experimentation platform that I built to combine data science, statistics, machine learning, and software engineering in one project.
 
-ExperimentForge is a full-stack A/B-testing platform built for a Data Science + Software Engineering portfolio. It ingests experiment data, validates experiment health, runs deterministic statistical inference, explores treatment-effect heterogeneity with machine learning, persists results, and uses an optional AI copilot to explain the evidence.
+The main idea is simple: upload experiment data, compare a control group and a treatment group, check whether the result is statistically meaningful, look for risky user segments, and get a final launch recommendation.
 
-**Design principle:** **Math decides. AI explains.**
+I wanted this project to be more than just a notebook, so I built it as a complete application with a backend API, database support, a web interface, automated tests, and an AI-assisted explanation layer.
 
-## What it demonstrates
+## What the project does
+
+ExperimentForge can:
+
+- upload and analyze A/B test data
+- compare control and treatment groups
+- calculate lift and confidence intervals
+- run significance tests for binary and continuous metrics
+- check sample-ratio mismatch (SRM)
+- scan user segments such as device type and country
+- apply Benjamini-Hochberg correction when testing multiple segments
+- detect unusual observations with anomaly detection
+- estimate heterogeneous treatment effects with a T-learner model
+- recommend whether an experiment should be shipped, held, or tested longer
+- explain experiment results through an AI Copilot / deterministic fallback
+
+## Example
+
+The included demo experiment tests a new recommendation-ranking system.
+
+The overall experiment shows a positive result:
+
+- Control conversion rate: about 12.35%
+- Treatment conversion rate: about 14.93%
+- Relative lift: about +20.9%
+- p-value: about 0.0036
+
+At first this looks like a successful experiment.
+
+However, the segment analysis finds that mobile users have a negative treatment effect of about -2.85 percentage points. After multiple-testing correction, the result is still statistically significant.
+
+Because of that, ExperimentForge recommends **HOLD** instead of immediately shipping the experiment.
+
+This was an important part of the project because it shows how a positive overall result can still hide problems inside specific user groups.
+
+## Tech Stack
+
+### Backend
+- Python
+- FastAPI
+- SQLAlchemy
+- Pydantic
+- SQLite
+- PostgreSQL-compatible configuration
 
 ### Data Science
-- A/B testing and hypothesis testing
-- two-proportion z-tests for binary metrics
-- Welch's t-tests for continuous metrics
-- confidence intervals and effect sizes
-- sample-ratio mismatch detection
-- segment-level treatment analysis with Benjamini-Hochberg FDR correction
-- Isolation Forest anomaly detection
-- random-forest T-learner for exploratory heterogeneous effects using plausible pre-treatment covariates
-- pandas / NumPy / SciPy / scikit-learn
+- pandas
+- NumPy
+- SciPy
+- scikit-learn
 
-### Software Engineering
-- FastAPI REST API
-- SQLAlchemy persistence
-- file-upload validation and defensive error handling
-- service-layer architecture
-- responsive product UI
-- API tests + analytics unit tests
-- GitHub Actions CI
-- optional Docker deployment
-- configuration through environment variables
+### Machine Learning / Statistics
+- two-proportion z-test
+- Welch's t-test
+- confidence intervals
+- effect-size calculations
+- sample-ratio mismatch checks
+- Benjamini-Hochberg correction
+- Isolation Forest
+- T-learner treatment-effect modeling
 
-### AI
-- optional Ollama integration
-- grounded prompts using computed JSON results only
-- deterministic fallback when no model is available
-- AI never computes significance or overrides launch status
+### Frontend
+- HTML
+- CSS
+- JavaScript
 
-## Fastest way to run it on macOS
+### Other Tools
+- pytest
+- GitHub Actions
+- Docker
+- Ollama support for local AI explanations
 
-From the project folder:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 5190
-```
-
-Then open:
-
-```text
-http://localhost:5190
-```
-
-There is **no npm install, frontend build, CORS setup, PostgreSQL server, or Docker requirement** for the default path.
-
-You can also run:
-
-```bash
-./run.sh
-```
-
-## First demo
-
-1. Open `http://localhost:5190`.
-2. Click **Load demo**.
-3. Inspect the primary metric, SRM check, segment scan, ML heterogeneity panel, and pipeline stages.
-4. Open **AI Copilot** and ask whether the experiment should ship.
-5. Upload `data/sample_experiment.csv` to test CSV ingestion yourself.
-
-For the sample CSV, choose:
-
-```text
-Metric column: converted
-Metric type: Binary (0/1)
-```
-
-## Optional Ollama
-
-ExperimentForge works without AI infrastructure. For a real local LLM response, install/run Ollama separately and set:
-
-```bash
-export OLLAMA_URL=http://localhost:11434
-export OLLAMA_MODEL=qwen2.5-coder:7b
-```
-
-If Ollama is unavailable, Copilot automatically falls back to a deterministic explanation derived from computed results.
-
-## Tests
-
-The final release includes 13 automated backend/API/statistical checks, including path-traversal protection, multiple-testing correction, data-cleaning accounting, and ML feature-leakage safeguards.
-
-
-```bash
-pip install -r requirements-dev.txt
-pytest
-node --check frontend/app.js
-```
-
-## Docker (optional)
-
-```bash
-docker build -t experimentforge .
-docker run --rm -p 5190:5190 experimentforge
-```
-
-Open `http://localhost:5190`.
-
-## Project structure
+## Project Structure
 
 ```text
 ExperimentForge/
 ├── backend/
 │   ├── app/
+│   │   ├── services/
 │   │   ├── main.py
-│   │   ├── database.py
 │   │   ├── models.py
-│   │   └── services/
-│   │       ├── statistics.py
-│   │       ├── pipeline.py
-│   │       ├── copilot.py
-│   │       └── demo.py
+│   │   ├── schemas.py
+│   │   └── database.py
 │   └── tests/
 ├── frontend/
 │   ├── index.html
-│   ├── styles.css
-│   └── app.js
+│   ├── app.js
+│   └── styles.css
 ├── data/
 │   └── sample_experiment.csv
 ├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── DATA_DICTIONARY.md
-│   └── INTERVIEW_GUIDE.md
-├── .github/workflows/ci.yml
-├── Dockerfile
+├── scripts/
 ├── requirements.txt
-└── run.sh
+├── run.sh
+└── README.md
 ```
 
-## Important statistical caveats
+## How to Run
 
-The randomized primary comparison remains the main causal launch signal. Segment scans apply Benjamini-Hochberg false-discovery-rate correction, but subgroup findings are still exploratory and should motivate follow-up analysis or experiments. The ML T-learner uses a heuristic filter to avoid obvious post-treatment/outcome-like columns; for real experiments, only pre-treatment covariates should be supplied to a treatment-effect model. The built-in SRM check assumes an intended 50/50 allocation.
+Clone the repository:
 
-## Resume-ready framing (after you personally run and understand it)
+```bash
+git clone https://github.com/Abhishek-Lamichhane2003/ExperimentForge.git
+cd ExperimentForge
+```
 
-**ExperimentForge — AI Experimentation & Decision Intelligence Platform**
-- Built a full-stack A/B-testing platform with Python, FastAPI, SQLAlchemy, SciPy, and scikit-learn to ingest experiment data, validate randomization, compute statistical significance and confidence intervals, and persist launch decisions.
-- Implemented segment analysis, Isolation Forest anomaly detection, and a random-forest T-learner to surface heterogeneous treatment effects and product-risk signals across user cohorts.
-- Added a grounded AI copilot that explains deterministic experiment results and suggests follow-up investigations without allowing the language model to alter statistical conclusions.
+Create a virtual environment:
 
-See `docs/INTERVIEW_GUIDE.md` before using the project in interviews.
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Install the dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the application:
+
+```bash
+./run.sh
+```
+
+Then open:
+
+```text
+http://127.0.0.1:5190
+```
+
+## Running the Tests
+
+Install the development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Then run:
+
+```bash
+pytest -q
+```
+
+## AI Copilot
+
+The Copilot is designed to explain experiment results instead of calculating them.
+
+The statistical pipeline remains the source of truth. The AI layer only receives already-computed results such as:
+
+- lift
+- p-values
+- confidence intervals
+- significant segments
+- launch recommendation
+
+If a local Ollama model is not available, ExperimentForge automatically uses a deterministic fallback so the application can still explain the experiment without failing.
+
+## What I Learned
+
+This project helped me practice both data science and software engineering.
+
+Some of the main things I worked with were:
+
+- designing an end-to-end data pipeline
+- validating experiment data
+- implementing statistical tests
+- handling multiple-comparison problems
+- building machine-learning models for treatment-effect exploration
+- designing REST APIs with FastAPI
+- storing experiment results
+- testing backend logic with pytest
+- connecting analysis results to a web interface
+- thinking about how AI should be used without replacing deterministic statistical logic
+
+## Why I Built This
+
+I wanted a project that was useful for both data science and software engineering roles.
+
+Instead of only training a model or only building a web application, ExperimentForge combines:
+
+- experimentation
+- statistics
+- machine learning
+- backend engineering
+- data pipelines
+- API development
+- frontend development
+- AI-assisted explanations
+
+## Future Improvements
+
+Some features I would like to add later are:
+
+- sequential testing
+- CUPED variance reduction
+- experiment scheduling
+- richer dashboards
+- experiment comparison
+- authentication and multi-user support
+- deployment to a cloud platform
+- stronger causal-inference methods
+
+## License
+
+This project is licensed under the MIT License.
