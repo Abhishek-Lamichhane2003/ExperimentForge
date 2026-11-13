@@ -6,6 +6,12 @@ The main idea is simple: upload experiment data, compare a control group and a t
 
 I wanted this project to be more than just a notebook, so I built it as a complete application with a backend API, database support, a web interface, automated tests, and an AI-assisted explanation layer.
 
+## Live Demo
+
+[Open ExperimentForge on Render](https://experimentforge-demo.onrender.com)
+
+The public demo includes the 6,000-user recommendation-ranking experiment and runs the full statistical analysis, segment-risk scan, and launch recommendation workflow without an upload.
+
 ## Screenshots
 
 ### Experiment Dashboard
