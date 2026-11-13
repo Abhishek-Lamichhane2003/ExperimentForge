@@ -7,4 +7,4 @@ COPY backend ./backend
 COPY frontend ./frontend
 COPY data ./data
 EXPOSE 5190
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "5190"]
+CMD ["sh", "-c", "uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-5190}"]

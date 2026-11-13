@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: experimentforge-demo
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////tmp/experimentforge.db
